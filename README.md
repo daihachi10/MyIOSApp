@@ -20,6 +20,8 @@ SwiftUI で作成したシンプルな iPhone アプリです。
 
 GitHub Actions の `Build iOS IPA` ワークフローが macOS ランナーで未署名 IPA を作成し、Actions の成果物として公開します。
 
+CIでは `project.yml` からXcodeGenでXcodeプロジェクトを生成してビルドするため、WindowsからでもIPA作成を実行できます。
+
 1. このリポジトリを GitHub に push する
 2. GitHub の Actions から `Build iOS IPA` を手動実行する
 3. 完了後、Artifacts の `MyIOSApp-ipa` をダウンロードする
