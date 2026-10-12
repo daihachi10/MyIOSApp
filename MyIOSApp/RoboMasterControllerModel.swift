@@ -90,8 +90,14 @@ final class RoboMasterControllerModel: ObservableObject {
                 let username = sshUsername
                 let password = sshPassword
                 let speed = speedPercent
+                let standardOutput: @Sendable (String) -> Void = { [weak self] line in
+                    Task { @MainActor in self?.appendLog("Pi受信: \(line)") }
+                }
+                let standardError: @Sendable (String) -> Void = { [weak self] line in
+                    Task { @MainActor in self?.appendLog("Pi受信エラー: \(line)") }
+                }
                 try await Task.detached(priority: .userInitiated) { [ssh] in
-                    try ssh.startReceiver(host: host, port: sshPort, username: username, password: password, speedPercent: speed, onStandardOutput: { _ in }, onStandardError: { _ in })
+                    try ssh.startReceiver(host: host, port: sshPort, username: username, password: password, speedPercent: speed, onStandardOutput: standardOutput, onStandardError: standardError)
                 }.value
                 appendLog("Pi側受信プログラムを起動しました")
             }

@@ -31,7 +31,7 @@ final class ControllerInput: ObservableObject {
     deinit { observations.forEach(NotificationCenter.default.removeObserver) }
 
     func selectController() {
-        guard let selected = GCController.controllers().first(where: { $0.dualsenseGamepad != nil }) else {
+        guard let selected = GCController.controllers().first(where: { $0.dualSenseGamepad != nil }) else {
             controllerDisconnected()
             return
         }
@@ -47,7 +47,7 @@ final class ControllerInput: ObservableObject {
     }
 
     private func configure(_ controller: GCController) {
-        guard let pad = controller.dualsenseGamepad else { return }
+        guard let pad = controller.dualSenseGamepad else { return }
         let setButton: (GCControllerButtonInput?, ControllerButton) -> Void = { [weak self] input, button in
             input?.valueChangedHandler = { [weak self] _, value, pressed in
                 Task { @MainActor in self?.update(button: button, pressed: pressed || value > 0.25) }

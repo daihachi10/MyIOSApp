@@ -79,12 +79,10 @@ actor RobotTcpSession {
     }
 
     private func connect(host: String, port: UInt16) async throws -> NWConnection {
-        let parameters = NWParameters.tcp
+        let tcpOptions = NWProtocolTCP.Options()
+        tcpOptions.noDelay = true
+        let parameters = NWParameters(tls: nil, tcp: tcpOptions)
         parameters.allowLocalEndpointReuse = true
-        parameters.requiredInterfaceType = nil
-        parameters.defaultProtocolStack.transportProtocol = NWProtocolTCP.Options()
-        let tcpOptions = parameters.defaultProtocolStack.transportProtocol as? NWProtocolTCP.Options
-        tcpOptions?.noDelay = true
         let connection = NWConnection(host: .init(host), port: .init(rawValue: port)!, using: parameters)
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask {
@@ -108,7 +106,7 @@ actor RobotTcpSession {
     }
 
     private func send(bytes: [UInt8], on connection: NWConnection) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             connection.send(content: Data(bytes), completion: .contentProcessed { error in
                 if let error { continuation.resume(throwing: error) } else { continuation.resume() }
             })

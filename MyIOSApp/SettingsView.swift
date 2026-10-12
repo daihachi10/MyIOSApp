@@ -129,9 +129,9 @@ private struct InputTestView: View {
         List {
             Section("DualSense") {
                 LabeledContent("状態", value: model.controllerConnected ? "検出済み" : "未検出")
-                LabeledContent("左スティック", value: "X \(model.snapshot.leftX, format: .number.precision(.fractionLength(2))) / Y \(model.snapshot.leftY, format: .number.precision(.fractionLength(2)))")
-                LabeledContent("右スティック", value: "X \(model.snapshot.rightX, format: .number.precision(.fractionLength(2))) / Y \(model.snapshot.rightY, format: .number.precision(.fractionLength(2)))")
-                LabeledContent("L2 / R2", value: "\(model.snapshot.leftTrigger, format: .number.precision(.fractionLength(2))) / \(model.snapshot.rightTrigger, format: .number.precision(.fractionLength(2)))")
+                LabeledContent("左スティック", value: "X \(twoDigits(model.snapshot.leftX)) / Y \(twoDigits(model.snapshot.leftY))")
+                LabeledContent("右スティック", value: "X \(twoDigits(model.snapshot.rightX)) / Y \(twoDigits(model.snapshot.rightY))")
+                LabeledContent("L2 / R2", value: "\(twoDigits(model.snapshot.leftTrigger)) / \(twoDigits(model.snapshot.rightTrigger))")
             }
             Section("押されているボタン") {
                 if model.snapshot.buttons.isEmpty { Text("なし").foregroundStyle(.secondary) }
@@ -143,4 +143,6 @@ private struct InputTestView: View {
         .onAppear { model.setSettingsInput(enabled: true); model.input.reset() }
         .onDisappear { model.input.reset(); model.setSettingsInput(enabled: false) }
     }
+
+    private func twoDigits(_ value: Double) -> String { String(format: "%.2f", value) }
 }
