@@ -17,7 +17,7 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Build unsigned iOS archive
+      - name: Build unsigned iOS app
         run: >-
           xcodebuild
           -project MyIOSApp.xcodeproj
@@ -25,15 +25,15 @@ jobs:
           -configuration Release
           -sdk iphoneos
           -destination 'generic/platform=iOS'
-          -archivePath "$RUNNER_TEMP/MyIOSApp.xcarchive"
+          -derivedDataPath "$RUNNER_TEMP/DerivedData"
           CODE_SIGNING_ALLOWED=NO
           CODE_SIGNING_REQUIRED=NO
-          archive
+          build
 
       - name: Package IPA
         run: |
           mkdir -p "$RUNNER_TEMP/Payload"
-          cp -R "$RUNNER_TEMP/MyIOSApp.xcarchive/Products/Applications/MyIOSApp.app" "$RUNNER_TEMP/Payload/"
+          cp -R "$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos/MyIOSApp.app" "$RUNNER_TEMP/Payload/"
           ditto -c -k --sequesterRsrc --keepParent \
             "$RUNNER_TEMP/Payload" \
             "$RUNNER_TEMP/MyIOSApp.ipa"
