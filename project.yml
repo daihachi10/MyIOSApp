@@ -1,0 +1,27 @@
+name: MyIOSApp
+
+options:
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+targets:
+  MyIOSApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: MyIOSApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.daihachi10.MyIOSApp
+        INFOPLIST_FILE: MyIOSApp/Info.plist
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        SUPPORTS_MACCATALYST: NO
+      configs:
+        Debug:
+          CODE_SIGNING_ALLOWED: NO
+        Release:
+          CODE_SIGNING_ALLOWED: NO
+

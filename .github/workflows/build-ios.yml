@@ -17,6 +17,11 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
+      - name: Generate Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate --spec project.yml
+
       - name: Build unsigned iOS app
         run: >-
           xcodebuild
