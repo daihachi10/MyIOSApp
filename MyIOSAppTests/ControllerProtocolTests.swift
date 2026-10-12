@@ -3,7 +3,7 @@ import XCTest
 
 final class ControllerProtocolTests: XCTestCase {
     func testEveryButtonUsesAndroidCompatibleBit() {
-        let expectations: [(ControllerButton, Int, UInt8)] = [
+        let expectations: [(ControllerButton, UInt8, Int)] = [
             (.cross, 1, 0), (.circle, 2, 0), (.square, 4, 0), (.triangle, 8, 0),
             (.create, 16, 0), (.home, 32, 0), (.options, 64, 0), (.leftStick, 128, 0),
             (.rightStick, 1, 1), (.l1, 2, 1), (.r1, 4, 1), (.dpadUp, 8, 1),
