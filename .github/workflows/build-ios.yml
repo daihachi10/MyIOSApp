@@ -29,8 +29,8 @@ jobs:
       - name: Build unsigned iOS app
         run: >-
           xcodebuild
-          -project MyIOSApp.xcodeproj
-          -scheme MyIOSApp
+          -project Controller.xcodeproj
+          -scheme Controller
           -configuration Release
           -sdk iphoneos
           -destination 'generic/platform=iOS'
@@ -42,8 +42,8 @@ jobs:
       - name: Run unit tests
         run: >-
           xcodebuild
-          -project MyIOSApp.xcodeproj
-          -scheme MyIOSApp
+          -project Controller.xcodeproj
+          -scheme Controller
           -configuration Debug
           -sdk iphonesimulator
           -destination 'platform=iOS Simulator,name=iPhone 18 Pro'
@@ -54,14 +54,14 @@ jobs:
       - name: Package IPA
         run: |
           mkdir -p "$RUNNER_TEMP/Payload"
-          cp -R "$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos/MyIOSApp.app" "$RUNNER_TEMP/Payload/"
+          cp -R "$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos/Controller.app" "$RUNNER_TEMP/Payload/"
           ditto -c -k --sequesterRsrc --keepParent \
             "$RUNNER_TEMP/Payload" \
-            "$RUNNER_TEMP/MyIOSApp.ipa"
+            "$RUNNER_TEMP/Controller.ipa"
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MyIOSApp-ipa
-          path: ${{ runner.temp }}/MyIOSApp.ipa
+          name: Controller-ipa
+          path: ${{ runner.temp }}/Controller.ipa
           if-no-files-found: error

@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A10000010000000000000001 /* MyIOSAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000001 /* MyIOSAppApp.swift */; };
+		A10000010000000000000001 /* ControllerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000001 /* ControllerApp.swift */; };
 		A10000010000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000110000000000000002 /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A10000110000000000000001 /* MyIOSAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyIOSAppApp.swift; sourceTree = "<group>"; };
+		A10000110000000000000001 /* ControllerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerApp.swift; sourceTree = "<group>"; };
 		A10000110000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A10000110000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A10000110000000000000004 /* MyIOSApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyIOSApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000110000000000000004 /* Controller.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Controller.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,25 +32,25 @@
 		A10000310000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				A10000310000000000000002 /* MyIOSApp */,
+				A10000310000000000000002 /* Controller */,
 				A10000310000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		A10000310000000000000002 /* MyIOSApp */ = {
+		A10000310000000000000002 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				A10000110000000000000001 /* MyIOSAppApp.swift */,
+				A10000110000000000000001 /* ControllerApp.swift */,
 				A10000110000000000000002 /* ContentView.swift */,
 				A10000110000000000000003 /* Info.plist */,
 			);
-			path = MyIOSApp;
+			path = Controller;
 			sourceTree = "<group>";
 		};
 		A10000310000000000000003 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A10000110000000000000004 /* MyIOSApp.app */,
+				A10000110000000000000004 /* Controller.app */,
 			);
 			name = Products;
 			path = "";
@@ -59,9 +59,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A10000410000000000000001 /* MyIOSApp */ = {
+		A10000410000000000000001 /* Controller */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A10000610000000000000002 /* Build configuration list for PBXNativeTarget "MyIOSApp" */;
+			buildConfigurationList = A10000610000000000000002 /* Build configuration list for PBXNativeTarget "Controller" */;
 			buildPhases = (
 				A10000210000000000000002 /* Sources */,
 				A10000210000000000000001 /* Frameworks */,
@@ -71,9 +71,9 @@
 			);
 			dependencies = (
 			);
-			name = MyIOSApp;
-			productName = MyIOSApp;
-			productReference = A10000110000000000000004 /* MyIOSApp.app */;
+			name = Controller;
+			productName = Controller;
+			productReference = A10000110000000000000004 /* Controller.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -90,7 +90,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A10000610000000000000001 /* Build configuration list for PBXProject "MyIOSApp" */;
+			buildConfigurationList = A10000610000000000000001 /* Build configuration list for PBXProject "Controller" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -103,7 +103,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A10000410000000000000001 /* MyIOSApp */,
+				A10000410000000000000001 /* Controller */,
 			);
 		};
 /* End PBXProject section */
@@ -123,7 +123,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A10000010000000000000001 /* MyIOSAppApp.swift in Sources */,
+				A10000010000000000000001 /* ControllerApp.swift in Sources */,
 				A10000010000000000000002 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -213,14 +213,14 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = MyIOSApp/Info.plist;
+				INFOPLIST_FILE = Controller/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.daihachi10.MyIOSApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.daihachi10.Controller;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -234,14 +234,14 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = MyIOSApp/Info.plist;
+				INFOPLIST_FILE = Controller/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.daihachi10.MyIOSApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.daihachi10.Controller;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -251,7 +251,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A10000610000000000000001 /* Build configuration list for PBXProject "MyIOSApp" */ = {
+		A10000610000000000000001 /* Build configuration list for PBXProject "Controller" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A10000710000000000000001 /* Debug */,
@@ -260,7 +260,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A10000610000000000000002 /* Build configuration list for PBXNativeTarget "MyIOSApp" */ = {
+		A10000610000000000000002 /* Build configuration list for PBXNativeTarget "Controller" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A10000710000000000000003 /* Debug */,

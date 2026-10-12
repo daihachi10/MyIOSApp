@@ -1,4 +1,4 @@
-name: MyIOSApp
+name: Controller
 
 options:
   deploymentTarget:
@@ -11,12 +11,12 @@ packages:
     from: 0.15.0
 
 targets:
-  MyIOSApp:
+  Controller:
     type: application
     platform: iOS
     deploymentTarget: "26.0"
     sources:
-      - path: MyIOSApp
+      - path: Controller
     dependencies:
       - package: swift-nio-ssh
         product: NIOSSH
@@ -26,8 +26,8 @@ targets:
         product: NIOPosix
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.daihachi10.MyIOSApp
-        INFOPLIST_FILE: MyIOSApp/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.daihachi10.controller
+        INFOPLIST_FILE: Controller/Info.plist
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1"
         SUPPORTS_MACCATALYST: NO
@@ -38,17 +38,17 @@ targets:
         Release:
           CODE_SIGNING_ALLOWED: NO
 
-  MyIOSAppTests:
+  ControllerTests:
     type: bundle.unit-test
     platform: iOS
     deploymentTarget: "26.0"
     sources:
-      - path: MyIOSAppTests
+      - path: ControllerTests
     dependencies:
-      - target: MyIOSApp
+      - target: Controller
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.daihachi10.MyIOSAppTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.daihachi10.controller.tests
         SWIFT_VERSION: "5.0"
         GENERATE_INFOPLIST_FILE: YES
 

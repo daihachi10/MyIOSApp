@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A10000410000000000000001"
-               BuildableName = "MyIOSApp.app"
-               BlueprintName = "MyIOSApp"
-               ReferencedContainer = "container:MyIOSApp.xcodeproj">
+               BuildableName = "Controller.app"
+               BlueprintName = "Controller"
+               ReferencedContainer = "container:Controller.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

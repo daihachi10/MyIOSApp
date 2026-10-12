@@ -59,10 +59,10 @@ SSHの初回LAN接続はAndroid版と互換のためホスト鍵を自動受諾�
 
 ## ビルドとAltStoreインストール
 
-このリポジトリのGitHub Actions **Build iOS IPA** はXcode 27ランナーで、署名していない `MyIOSApp.ipa` を作成します。
+このリポジトリのGitHub Actions **Build iOS IPA** はXcode 27ランナーで、署名していない `Controller.ipa` を作成します。
 
 1. `feature/robomaster-ios` をGitHubへpush、またはActionsから手動実行します。
-2. 成功した実行のArtifactsから `MyIOSApp-ipa` をダウンロードします。
+2. 成功した実行のArtifactsから `Controller-ipa` をダウンロードします。
 3. WindowsのAltServer / AltStoreでIPAを開き、Apple IDで署名してiPhoneへインストールします。
 
 MacではXcode 27とXcodeGenを用意し、次でプロジェクトを再生成してビルドできます。
@@ -70,7 +70,7 @@ MacではXcode 27とXcodeGenを用意し、次でプロジェクトを再生成�
 ```sh
 brew install xcodegen
 xcodegen generate --spec project.yml
-xcodebuild -project MyIOSApp.xcodeproj -scheme MyIOSApp -destination 'platform=iOS Simulator,name=iPhone 18 Pro' test
+xcodebuild -project Controller.xcodeproj -scheme Controller -destination 'platform=iOS Simulator,name=iPhone 18 Pro' test
 ```
 
 ## 確認項目

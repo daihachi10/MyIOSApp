@@ -2,7 +2,7 @@ import Foundation
 import Security
 
 enum KeychainStore {
-    private static let service = "com.daihachi10.MyIOSApp.ssh"
+    private static let service = "com.daihachi10.controller.ssh"
 
     static func loadPassword() -> String {
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecReturnData as String: true]

@@ -1,5 +1,5 @@
 import XCTest
-@testable import MyIOSApp
+@testable import Controller
 
 final class ControllerProtocolTests: XCTestCase {
     func testEveryButtonUsesAndroidCompatibleBit() {
