@@ -5,17 +5,21 @@ on:
   push:
     branches:
       - main
+      - feature/robomaster-ios
 
 jobs:
   build:
-    runs-on: macos-15-intel
+    # iOS 27 SDK requires Xcode 27. GitHub-hosted xcode-27 is Apple silicon.
+    runs-on: xcode-27
 
     steps:
       - name: Check out source
         uses: actions/checkout@v6
 
       - name: Show Xcode version
-        run: xcodebuild -version
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
 
       - name: Generate Xcode project
         run: |
@@ -34,6 +38,18 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
           CODE_SIGNING_REQUIRED=NO
           build
+
+      - name: Run unit tests
+        run: >-
+          xcodebuild
+          -project MyIOSApp.xcodeproj
+          -scheme MyIOSApp
+          -configuration Debug
+          -sdk iphonesimulator
+          -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+          -derivedDataPath "$RUNNER_TEMP/DerivedDataTests"
+          CODE_SIGNING_ALLOWED=NO
+          test
 
       - name: Package IPA
         run: |

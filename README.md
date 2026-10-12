@@ -1,30 +1,82 @@
-# MyIOSApp
+# RoboMaster Controller for iPhone
 
-SwiftUI で作成したシンプルな iPhone アプリです。
+Raspberry Pi上の既存 `controller_motor_receiver.py` に、USB接続したDualSenseの入力をTCPで送るSwiftUIアプリです。Pi側・STM32側のソフトウェアと8バイト通信仕様は変更しません。
 
-## 機能
+> **安全上の注意**: 初回確認は必ず車輪を浮かせ、非常停止できる状態で行ってください。通信断・USB切断・画面ロック・アプリのバックグラウンド移行時には、アプリが中立フレームを3回送信して切断します。バックグラウンドでの連続操作はできません。
 
-- 起動時に `Hello iPhone!` を表示
-- `Count Up` ボタンを押すとカウントアップ
-- iOS のシステム外観設定に追従するダークモード対応
+## 必要なもの
 
-## 起動方法
+- iOS 26以降のiPhone（iOS 27 SDKでビルド）
+- データ通信対応USBケーブルとUSB-Cハブ等で接続したDualSense
+- 同一LAN上のRaspberry Pi（既存の受信プログラム）
+- PiのSSHアカウント（既定ユーザー名: `daihachi`）
 
-1. macOS の Xcode で `MyIOSApp.xcodeproj` を開く
-2. Signing & Capabilities で自分の開発チームを選択する
-3. iPhone シミュレータまたは接続した iPhone を選択して Run
+アプリはBluetoothのペアリング、スキャン、独自HIDアクセスを行いません。DualSenseはiPhoneのUSBアクセサリとして接続してください。iOSが公開しないPS/Home、Touchpad、Muteなどの入力は機種・OSの仕様により未押下になることがあります。
 
-対応デプロイメントターゲットは iOS 16.0 以降です。
+## 使い方
 
-## Windows から IPA を作る場合
+1. iPhoneをPiと同じWi-Fiへ接続し、DualSenseをUSBで接続します。
+2. アプリでPiのIPアドレスとTCPポート（既定 `5001`）を確認します。
+3. 画面右上の詳細設定でSSHユーザー名・ポート・パスワードを入力し、「パスワードをKeychainへ保存」を押します。パスワードはソースコード、Git、ログ、IPAに含まれません。
+4. Pi側プログラムをアプリから起動する場合は「Pi側プログラムをSSHで起動」をオンにします。起動コマンドは次の形式です。
 
-GitHub Actions の `Build iOS IPA` ワークフローが macOS ランナーで未署名 IPA を作成し、Actions の成果物として公開します。
+   ```sh
+   python3 -u "$HOME/DifferentialDriveRobomaster/controller_motor_receiver.py" \
+     --max-rpm 12000 --max-current 4000
+   ```
 
-CIでは `project.yml` からXcodeGenでXcodeプロジェクトを生成してビルドするため、WindowsからでもIPA作成を実行できます。
+5. スティックを中央に戻し、DualSense検出とPiへのICMP Ping応答を確認して「接続」を押します。
+6. Options＋Create（または設定したOptions長押し）で非常停止します。解除するにはボタンとスティックを離して「非常停止を解除」を押します。
 
-1. このリポジトリを GitHub に push する
-2. GitHub の Actions から `Build iOS IPA` を手動実行する
-3. 完了後、Artifacts の `MyIOSApp-ipa` をダウンロードする
-4. Windows の AltServer / AltStore で IPA を読み込み、Apple ID で署名して iPhone にインストールする
+速度上限はPiの起動引数 `--max-rpm` にだけ反映されます。TCPフレームの軸値を二重に縮小しません。
 
-未署名 IPA の作成には Apple Developer 証明書を使用しません。署名は AltServer 側で行います。
+## パケット仕様
+
+TCP接続後に、次の順で送信します。
+
+1. ASCII `Hello Raspi!\n`
+2. 中立の8バイトフレーム
+3. 20 msごとの最新フレーム（50 Hz）
+
+| Byte | 内容 |
+| --- | --- |
+| 0 | `AA` |
+| 1 | Cross / Circle / Square / Triangle / Create / Home / Options / L3 |
+| 2 | R3 / L1 / R1 / D-pad上・下・左・右 / Touchpad |
+| 3 | Mute / L2 / R2 |
+| 4–7 | 左X / 左Y / 右X / 右Y（`0...255`、中央 `128`） |
+
+デッドゾーンは半径5%（詳細設定で0〜30%）、トリガーは25%を超えるとビットを立てます。切断時は中立フレームを3回送信します。非常停止はOptionsフレーム3回、続けて中立フレーム3回です。
+
+## 詳細設定
+
+- 操作プロファイル、速度、デッドゾーン、感度、軸反転
+- TCPを始めない入力テスト
+- SSH手動コマンド、`pkill python; pkill python3`、Piシャットダウン
+- 新しい順のログ（ログ欄だけがスクロールします）
+
+SSHの初回LAN接続はAndroid版と互換のためホスト鍵を自動受諾します。信頼できるローカルネットワークでのみ使用してください。
+
+## ビルドとAltStoreインストール
+
+このリポジトリのGitHub Actions **Build iOS IPA** はXcode 27ランナーで、署名していない `MyIOSApp.ipa` を作成します。
+
+1. `feature/robomaster-ios` をGitHubへpush、またはActionsから手動実行します。
+2. 成功した実行のArtifactsから `MyIOSApp-ipa` をダウンロードします。
+3. WindowsのAltServer / AltStoreでIPAを開き、Apple IDで署名してiPhoneへインストールします。
+
+MacではXcode 27とXcodeGenを用意し、次でプロジェクトを再生成してビルドできます。
+
+```sh
+brew install xcodegen
+xcodegen generate --spec project.yml
+xcodebuild -project MyIOSApp.xcodeproj -scheme MyIOSApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
+```
+
+## 確認項目
+
+- Unit Test: ボタン配置、トリガー、デッドゾーン、軸変換、8バイト中立フレーム、非常停止、Pi起動コマンド
+- 実機: USB DualSenseの左右スティック、Options、D-pad、L1/R1、L2/R2
+- 実機: Pi接続、非常停止、USB切断、端末ロック、Wi-Fi切断を車輪を浮かせて確認
+
+実機のモーター動作は、環境ごとに上記の安全確認を行ってください。

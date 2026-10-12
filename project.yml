@@ -2,16 +2,28 @@ name: MyIOSApp
 
 options:
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "26.0"
   createIntermediateGroups: true
+
+packages:
+  swift-nio-ssh:
+    url: https://github.com/apple/swift-nio-ssh.git
+    from: 0.15.0
 
 targets:
   MyIOSApp:
     type: application
     platform: iOS
-    deploymentTarget: "16.0"
+    deploymentTarget: "26.0"
     sources:
       - path: MyIOSApp
+    dependencies:
+      - package: swift-nio-ssh
+        product: NIOSSH
+      - package: swift-nio-ssh
+        product: NIOCore
+      - package: swift-nio-ssh
+        product: NIOPosix
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.daihachi10.MyIOSApp
@@ -19,9 +31,24 @@ targets:
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1"
         SUPPORTS_MACCATALYST: NO
+        SWIFT_STRICT_CONCURRENCY: complete
       configs:
         Debug:
           CODE_SIGNING_ALLOWED: NO
         Release:
           CODE_SIGNING_ALLOWED: NO
+
+  MyIOSAppTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: MyIOSAppTests
+    dependencies:
+      - target: MyIOSApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.daihachi10.MyIOSAppTests
+        SWIFT_VERSION: "5.0"
+        GENERATE_INFOPLIST_FILE: YES
 
