@@ -70,7 +70,7 @@ MacではXcode 27とXcodeGenを用意し、次でプロジェクトを再生成�
 ```sh
 brew install xcodegen
 xcodegen generate --spec project.yml
-xcodebuild -project MyIOSApp.xcodeproj -scheme MyIOSApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
+xcodebuild -project MyIOSApp.xcodeproj -scheme MyIOSApp -destination 'platform=iOS Simulator,name=iPhone 18 Pro' test
 ```
 
 ## 確認項目

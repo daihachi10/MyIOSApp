@@ -46,7 +46,7 @@ jobs:
           -scheme MyIOSApp
           -configuration Debug
           -sdk iphonesimulator
-          -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+          -destination 'platform=iOS Simulator,name=iPhone 18 Pro'
           -derivedDataPath "$RUNNER_TEMP/DerivedDataTests"
           CODE_SIGNING_ALLOWED=NO
           test
