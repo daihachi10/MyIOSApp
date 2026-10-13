@@ -15,7 +15,7 @@ struct SettingsView: View {
                 profilesSection
                 Section("入力テスト") {
                     NavigationLink { InputTestView(model: model) } label: {
-                        Label("入力テストを開く", systemImage: "gamecontroller")
+                        SettingsActionLabel("入力テストを開く", systemImage: "gamecontroller.fill", color: .purple)
                     }
                     Text("テスト中はTCP通信を開始できません。画面を閉じると入力を中立へ戻します。")
                         .font(.footnote).foregroundStyle(.secondary)
@@ -84,13 +84,22 @@ struct SettingsView: View {
             TextField("ユーザー名", text: $model.sshUsername).textInputAutocapitalization(.never).autocorrectionDisabled()
             TextField("SSHポート", text: $model.sshPort).keyboardType(.numberPad)
             SecureField("パスワード", text: $model.sshPassword)
-            Button("パスワードをKeychainへ保存", systemImage: "key.fill") { model.saveSSHPassword() }
-            Text("パスワードはこの端末のKeychainへ保存します。ソースコード・ログ・IPAには保存されません。")
-                .font(.footnote).foregroundStyle(.secondary)
+            Button { model.saveSSHPassword() } label: {
+                SettingsActionLabel("パスワードをKeychainへ保存", systemImage: "key.fill", color: .blue)
+            }
             TextField("手動SSHコマンド", text: $manualCommand, axis: .vertical).lineLimit(1...3).textInputAutocapitalization(.never).autocorrectionDisabled()
-            Button("手動実行", systemImage: "terminal") { model.runManualSSH(manualCommand) }.disabled(manualCommand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || model.sshCommandRunning)
-            Button("Python / python3 を停止", systemImage: "xmark.octagon", role: .destructive) { model.killPython() }.disabled(model.sshCommandRunning)
-            Button("Raspberry Piをシャットダウン", systemImage: "power", role: .destructive) { showShutdownConfirmation = true }.disabled(model.sshCommandRunning)
+            Button { model.runManualSSH(manualCommand) } label: {
+                SettingsActionLabel("手動実行", systemImage: "terminal", color: .teal)
+            }
+            .disabled(manualCommand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || model.sshCommandRunning)
+            Button(role: .destructive) { model.killPython() } label: {
+                SettingsActionLabel("Python / python3 を停止", systemImage: "xmark", color: .red)
+            }
+            .disabled(model.sshCommandRunning)
+            Button(role: .destructive) { showShutdownConfirmation = true } label: {
+                SettingsActionLabel("Raspberry Piをシャットダウン", systemImage: "power", color: .red)
+            }
+            .disabled(model.sshCommandRunning)
             if let result = model.lastSSHResult {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("直前のSSH: 終了コード \(result.exitStatus)").font(.subheadline.weight(.medium))
@@ -110,12 +119,40 @@ struct SettingsView: View {
             }
             .frame(height: 230)
             .accessibilityLabel("ログ。新しい項目が先頭です")
-            Button("ログを消去", systemImage: "trash") { model.clearLogs() }.tint(.red)
-        } header: { Text("ログ（新しい順）") }
+            Button(role: .destructive) { model.clearLogs() } label: {
+                SettingsActionLabel("ログを消去", systemImage: "trash.fill", color: .red)
+            }
+        } header: { Text("ログ") }
     }
 
     private func binding<T>(_ keyPath: WritableKeyPath<ControlTuning, T>) -> Binding<T> {
         Binding(get: { model.tuning[keyPath: keyPath] }, set: { model.tuning[keyPath: keyPath] = $0; model.selectedProfileID = nil })
+    }
+}
+
+private struct SettingsActionLabel: View {
+    let title: LocalizedStringKey
+    let systemImage: String
+    let color: Color
+    @ScaledMetric(relativeTo: .body) private var iconSize: CGFloat = 30
+
+    init(_ title: LocalizedStringKey, systemImage: String, color: Color) {
+        self.title = title
+        self.systemImage = systemImage
+        self.color = color
+    }
+
+    var body: some View {
+        Label {
+            Text(title)
+        } icon: {
+            Image(systemName: systemImage)
+                .font(.system(size: iconSize * 0.54, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: iconSize, height: iconSize)
+                .background(color.gradient, in: RoundedRectangle(cornerRadius: iconSize * 0.22, style: .continuous))
+        }
+        .labelStyle(.titleAndIcon)
     }
 }
 
