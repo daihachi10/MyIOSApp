@@ -36,6 +36,14 @@ final class ControllerProtocolTests: XCTestCase {
         XCTAssertEqual(ControllerPacketEncoder.neutralPacket(), [0xAA, 0, 0, 0, 128, 128, 128, 128])
     }
 
+    func testTuningHasNoAxisInversionAndLoadsLegacySettings() throws {
+        let encoded = try JSONEncoder().encode(ControlTuning())
+        XCTAssertFalse(String(decoding: encoded, as: UTF8.self).contains("invert"))
+
+        let legacy = Data(#"{"deadzone":0.08,"sensitivity":1.2,"invertLeftX":true,"invertLeftY":true,"invertRightX":true,"invertRightY":true}"#.utf8)
+        XCTAssertEqual(try JSONDecoder().decode(ControlTuning.self, from: legacy), .init(deadzone: 0.08, sensitivity: 1.2))
+    }
+
     func testEmergencyModes() {
         let detector = EmergencyStopDetector()
         XCTAssertFalse(detector.update(snapshot: .init(buttons: [.options]), mode: .optionsCreate))

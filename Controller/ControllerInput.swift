@@ -1,8 +1,8 @@
 import Foundation
 import GameController
 
-/// Bridges the system GameController events into the protocol model. USB is the supported path;
-/// this app never starts Bluetooth pairing or scans on its own.
+/// Bridges USB and Bluetooth controllers exposed by the system GameController framework
+/// into the protocol model. Bluetooth pairing itself is performed in iOS Settings.
 @MainActor
 final class ControllerInput: ObservableObject {
     @Published private(set) var connected = false
@@ -27,10 +27,16 @@ final class ControllerInput: ObservableObject {
                 Task { @MainActor in self?.controllerDisconnected(disconnected) }
             }
         ]
+        GCController.startWirelessControllerDiscovery { [weak self] in
+            Task { @MainActor in self?.selectController() }
+        }
         selectController()
     }
 
-    deinit { observations.forEach(NotificationCenter.default.removeObserver) }
+    deinit {
+        GCController.stopWirelessControllerDiscovery()
+        observations.forEach(NotificationCenter.default.removeObserver)
+    }
 
     func selectController() {
         guard let selected = GCController.controllers().first(where: { dualSensePad(of: $0) != nil }) else {
@@ -111,7 +117,7 @@ final class ControllerInput: ObservableObject {
     }
 
     private func dualSensePad(of controller: GCController) -> GCExtendedGamepad? {
-        // Some iOS versions expose a USB DualSense as the base extended-gamepad
+        // Some iOS versions expose a USB or Bluetooth DualSense as the base extended-gamepad
         // profile rather than GCDualSenseGamepad. The controls used by this app
         // are all part of GCExtendedGamepad, so accepting that profile is safer.
         controller.extendedGamepad

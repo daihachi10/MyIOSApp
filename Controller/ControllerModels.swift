@@ -34,10 +34,6 @@ struct ControllerSnapshot: Equatable, Sendable {
 struct ControlTuning: Codable, Equatable, Sendable {
     var deadzone = 0.05
     var sensitivity = 1.0
-    var invertLeftX = false
-    var invertLeftY = false
-    var invertRightX = false
-    var invertRightY = false
 
     func normalized() -> ControlTuning {
         var copy = self
@@ -99,9 +95,9 @@ struct ControllerPacketEncoder {
         let tuning = tuning.normalized()
         let left = applyRadialDeadzone(snapshot.leftX, snapshot.leftY, radius: tuning.deadzone)
         let right = applyRadialDeadzone(snapshot.rightX, snapshot.rightY, radius: tuning.deadzone)
-        func transformed(_ value: Double, inverted: Bool) -> UInt8 {
+        func transformed(_ value: Double) -> UInt8 {
             let shaped = value.sign == .minus ? -pow(abs(value), tuning.sensitivity) : pow(abs(value), tuning.sensitivity)
-            return axisToByte(inverted ? -shaped : shaped)
+            return axisToByte(shaped)
         }
 
         var b1: UInt8 = 0
@@ -119,8 +115,8 @@ struct ControllerPacketEncoder {
         b3.set(1, snapshot.buttons.contains(.l2) || snapshot.leftTrigger > triggerThreshold)
         b3.set(2, snapshot.buttons.contains(.r2) || snapshot.rightTrigger > triggerThreshold)
         return [0xAA, b1, b2, b3,
-                transformed(left.0, inverted: tuning.invertLeftX), transformed(left.1, inverted: tuning.invertLeftY),
-                transformed(right.0, inverted: tuning.invertRightX), transformed(right.1, inverted: tuning.invertRightY)]
+                transformed(left.0), transformed(left.1),
+                transformed(right.0), transformed(right.1)]
     }
 
     static func neutralPacket() -> [UInt8] { encode(.neutral) }

@@ -63,10 +63,6 @@ struct SettingsView: View {
                 Text("感度 \(model.tuning.sensitivity, format: .number.precision(.fractionLength(2)))")
                 Slider(value: binding(\.sensitivity), in: 0.5...2, step: 0.05)
             }
-            Toggle("左スティック X を反転", isOn: binding(\.invertLeftX))
-            Toggle("左スティック Y を反転", isOn: binding(\.invertLeftY))
-            Toggle("右スティック X を反転", isOn: binding(\.invertRightX))
-            Toggle("右スティック Y を反転", isOn: binding(\.invertRightY))
         }
     }
 

@@ -237,7 +237,7 @@ final class RoboMasterControllerModel: ObservableObject {
         let message: String?
         switch true {
         case emergencyStopped: message = "非常停止を解除してから接続してください"
-        case !controllerConnected: message = "USB接続のDualSenseが検出されていません"
+        case !controllerConnected: message = "DualSenseが検出されていません。USB接続またはiOS設定のBluetooth接続を確認してください"
         case !snapshot.sticksAreCentered(): message = "左右のスティックを中央に戻してください"
         case snapshot.buttons.contains(.options) || snapshot.buttons.contains(.create): message = "OptionsとCreateを離してから接続してください"
         case !hostIsValid: message = "ホスト名またはIPv4アドレスを確認してください"
