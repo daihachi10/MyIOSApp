@@ -24,8 +24,10 @@ actor RobotTcpSession {
         var lastError: Error?
         for attempt in 1...5 {
             eventHandler(.connecting(attempt: attempt, maximumAttempts: 5))
+            var candidate: NWConnection?
             do {
-                let candidate = try await connect(host: host, port: port)
+                candidate = try await connect(host: host, port: port)
+                guard let candidate else { throw RobotTcpError.cancelled }
                 connection = candidate
                 try await send(bytes: Array("Hello Raspi!\n".utf8), on: candidate)
                 try await send(bytes: ControllerPacketEncoder.neutralPacket(), on: candidate)
@@ -33,6 +35,8 @@ actor RobotTcpSession {
                 startLoop(on: candidate)
                 return
             } catch {
+                candidate?.cancel()
+                connection = nil
                 lastError = error
                 if attempt < 5 { try? await Task.sleep(for: .seconds(1)) }
             }
@@ -83,25 +87,9 @@ actor RobotTcpSession {
         tcpOptions.noDelay = true
         let parameters = NWParameters(tls: nil, tcp: tcpOptions)
         parameters.allowLocalEndpointReuse = true
-        let connection = NWConnection(host: .init(host), port: .init(rawValue: port)!, using: parameters)
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-                    connection.stateUpdateHandler = { state in
-                        switch state {
-                        case .ready: continuation.resume()
-                        case .failed(let error): continuation.resume(throwing: error)
-                        case .cancelled: continuation.resume(throwing: RobotTcpError.cancelled)
-                        default: break
-                        }
-                    }
-                    connection.start(queue: .global(qos: .userInitiated))
-                }
-            }
-            group.addTask { try await Task.sleep(for: .seconds(3)); throw RobotTcpError.timedOut }
-            defer { group.cancelAll() }
-            try await group.next()!
-        }
+        guard let endpointPort = NWEndpoint.Port(rawValue: port) else { throw RobotTcpError.invalidPort }
+        let connection = NWConnection(host: .init(host), port: endpointPort, using: parameters)
+        try await NWConnectionReadyWaiter(connection: connection, timeout: 3).wait()
         return connection
     }
 
@@ -124,12 +112,63 @@ actor RobotTcpSession {
 }
 
 enum RobotTcpError: LocalizedError {
-    case timedOut, cancelled, connectionFailed(String)
+    case timedOut, cancelled, invalidPort, connectionFailed(String)
     var errorDescription: String? {
         switch self {
         case .timedOut: "TCP接続が3秒以内に完了しませんでした"
         case .cancelled: "TCP接続が中止されました"
+        case .invalidPort: "TCPポートは1～65535で入力してください"
         case .connectionFailed(let message): message
         }
+    }
+}
+
+/// Waits for exactly one terminal NWConnection state. The state handler and timeout run on
+/// the same serial queue, preventing checked continuations from being resumed more than once.
+private final class NWConnectionReadyWaiter: @unchecked Sendable {
+    private let connection: NWConnection
+    private let timeout: TimeInterval
+    private let queue = DispatchQueue(label: "com.daihachi10.controller.tcp-connect")
+    private var continuation: CheckedContinuation<Void, Error>?
+    private var completed = false
+
+    init(connection: NWConnection, timeout: TimeInterval) {
+        self.connection = connection
+        self.timeout = timeout
+    }
+
+    func wait() async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            queue.async {
+                self.continuation = continuation
+                self.connection.stateUpdateHandler = { [weak self] state in self?.handle(state) }
+                self.connection.start(queue: self.queue)
+                self.queue.asyncAfter(deadline: .now() + self.timeout) { [weak self] in
+                    self?.finish(.failure(RobotTcpError.timedOut), cancelConnection: true)
+                }
+            }
+        }
+    }
+
+    private func handle(_ state: NWConnection.State) {
+        switch state {
+        case .ready:
+            finish(.success(()), cancelConnection: false)
+        case .failed(let error):
+            finish(.failure(error), cancelConnection: true)
+        case .cancelled:
+            finish(.failure(RobotTcpError.cancelled), cancelConnection: false)
+        default:
+            break
+        }
+    }
+
+    private func finish(_ result: Result<Void, Error>, cancelConnection: Bool) {
+        guard !completed, let continuation else { return }
+        completed = true
+        self.continuation = nil
+        connection.stateUpdateHandler = nil
+        if cancelConnection { connection.cancel() }
+        continuation.resume(with: result)
     }
 }

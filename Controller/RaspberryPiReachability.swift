@@ -48,7 +48,9 @@ private enum ICMPProbe {
             return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: "ICMP echo requestを送信できませんでした")
         }
         var response = [UInt8](repeating: 0, count: 256)
-        let count = recv(fd, &response, response.count, 0)
+        let count = response.withUnsafeMutableBytes { bytes in
+            recv(fd, bytes.baseAddress, bytes.count, 0)
+        }
         guard count > 0 else {
             return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: "Raspberry Piからping応答がありません")
         }

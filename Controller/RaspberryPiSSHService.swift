@@ -70,6 +70,7 @@ final class RaspberryPiSSHService: @unchecked Sendable {
     private func connect(host: String, port: Int, username: String, password: String, group: EventLoopGroup) throws -> Channel {
         guard !username.isEmpty, !password.isEmpty else { throw SSHError.missingCredentials }
         let bootstrap = ClientBootstrap(group: group)
+            .connectTimeout(.seconds(3))
             .channelInitializer { channel in
                 channel.eventLoop.makeCompletedFuture {
                     let handler = NIOSSHHandler(role: .client(.init(

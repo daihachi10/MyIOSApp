@@ -64,7 +64,10 @@ final class RoboMasterControllerModel: ObservableObject {
         return trimmed.allSatisfy { $0.isLetter || $0.isNumber || $0 == "." || $0 == "-" }
     }
 
-    var validPort: UInt16? { UInt16(port) }
+    var validPort: UInt16? {
+        guard let value = UInt16(port), value > 0 else { return nil }
+        return value
+    }
     var canConnect: Bool {
         !connectionStatus.isActive && !emergencyStopped && controllerConnected && snapshot.sticksAreCentered() &&
         !snapshot.buttons.contains(.options) && !snapshot.buttons.contains(.create) && hostIsValid && validPort != nil &&
@@ -216,7 +219,12 @@ final class RoboMasterControllerModel: ObservableObject {
                 }
             }
         case .failed(let message):
-            sendErrorCount += 1; errorText = message; appendLog("送信エラー: \(message)")
+            sendErrorCount += 1
+            errorText = message
+            connectionStatus = .error
+            UIApplication.shared.isIdleTimerDisabled = false
+            ssh.close()
+            appendLog("送信エラーにより切断: \(message)")
         }
     }
 
@@ -224,6 +232,13 @@ final class RoboMasterControllerModel: ObservableObject {
         pingTask = Task { [weak self] in
             while !Task.isCancelled {
                 guard let self else { return }
+                guard self.connectionStatus.isActive else {
+                    if self.ping.reachable || self.ping.roundTripMilliseconds != nil {
+                        self.ping = .init(reachable: false, roundTripMilliseconds: nil, failureDescription: nil)
+                    }
+                    try? await Task.sleep(for: .seconds(1))
+                    continue
+                }
                 let host = self.host.trimmingCharacters(in: .whitespacesAndNewlines)
                 let result = self.hostIsValid ? await self.reachability.measure(host: host) : PingResult(reachable: false, roundTripMilliseconds: nil, failureDescription: nil)
                 guard !Task.isCancelled else { return }
