@@ -51,6 +51,7 @@ final class RoboMasterControllerModel: ObservableObject {
         customProfiles = Self.load(defaults, key: "customProfiles", fallback: [])
         selectedProfileID = Self.load(defaults, key: "selectedProfileID", fallback: Optional<UUID>.none)
         input.onChanged = { [weak self] snapshot in self?.receive(snapshot) }
+        input.onConnectionChanged = { [weak self] connected in self?.controllerConnectionChanged(connected) }
         controllerConnected = input.connected
         startPingLoop()
     }
@@ -66,7 +67,7 @@ final class RoboMasterControllerModel: ObservableObject {
     var validPort: UInt16? { UInt16(port) }
     var canConnect: Bool {
         !connectionStatus.isActive && !emergencyStopped && controllerConnected && snapshot.sticksAreCentered() &&
-        !snapshot.buttons.contains(.options) && !snapshot.buttons.contains(.create) && hostIsValid && ping.reachable && validPort != nil &&
+        !snapshot.buttons.contains(.options) && !snapshot.buttons.contains(.create) && hostIsValid && validPort != nil &&
         (!autoStartReceiver || (!sshUsername.isEmpty && !sshPassword.isEmpty && UInt16(sshPort) != nil))
     }
 
@@ -193,6 +194,14 @@ final class RoboMasterControllerModel: ObservableObject {
         }
     }
 
+    private func controllerConnectionChanged(_ connected: Bool) {
+        let wasConnected = controllerConnected
+        controllerConnected = connected
+        if wasConnected, !connected, connectionStatus.isActive {
+            Task { await disconnect(reason: "コントローラーが外れたため安全停止しました") }
+        }
+    }
+
     private func handleSessionEvent(_ event: RobotSessionEvent) {
         switch event {
         case .connecting(let attempt, _): connectionStatus = .connecting(attempt)
@@ -232,7 +241,6 @@ final class RoboMasterControllerModel: ObservableObject {
         case !snapshot.sticksAreCentered(): message = "左右のスティックを中央に戻してください"
         case snapshot.buttons.contains(.options) || snapshot.buttons.contains(.create): message = "OptionsとCreateを離してから接続してください"
         case !hostIsValid: message = "ホスト名またはIPv4アドレスを確認してください"
-        case !ping.reachable: message = ping.failureDescription ?? "Raspberry Piからping応答がありません"
         case validPort == nil: message = "ポートは1～65535で入力してください"
         case autoStartReceiver && (sshUsername.isEmpty || sshPassword.isEmpty || UInt16(sshPort) == nil): message = "SSH設定とKeychainのパスワードを確認してください"
         default: message = nil
@@ -242,7 +250,7 @@ final class RoboMasterControllerModel: ObservableObject {
     }
 
     private func runSSH(label: String, command: String, standardInput: String? = nil) {
-        guard !sshCommandRunning, hostIsValid, ping.reachable, !sshUsername.isEmpty, !sshPassword.isEmpty, let port = Int(sshPort) else { errorText = "SSH設定またはPi接続を確認してください"; return }
+        guard !sshCommandRunning, hostIsValid, !sshUsername.isEmpty, !sshPassword.isEmpty, let port = Int(sshPort) else { errorText = "SSH設定を確認してください"; return }
         sshCommandRunning = true; errorText = nil; appendLog("\(label) 実行: \(command)")
         let host = host.trimmingCharacters(in: .whitespacesAndNewlines); let username = sshUsername; let password = sshPassword
         Task { [weak self, ssh] in

@@ -28,7 +28,7 @@ struct ContentView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("詳細設定", systemImage: "gearshape") { showSettings = true }
                         .accessibilityHint("SSH、操作プロファイル、ログの詳細設定を開きます")
-                        .liquidGlassCircle()
+                        .labelStyle(.iconOnly)
                 }
             }
             .sheet(isPresented: $showSettings) {
@@ -85,8 +85,8 @@ private struct DestinationCard: View {
             TextField("Raspberry PiのIPまたはホスト名", text: $model.host).textInputAutocapitalization(.never).autocorrectionDisabled().textContentType(.URL).keyboardType(.URL).textFieldStyle(.roundedBorder).accessibilityLabel("Raspberry Piホスト")
             TextField("ポート", text: $model.port).keyboardType(.numberPad).textFieldStyle(.roundedBorder).accessibilityLabel("TCPポート")
             Button { Task { await model.begin() } } label: { Label("接続", systemImage: "link").frame(maxWidth: .infinity) }
-                .buttonStyle(.glassProminent).controlSize(.large).disabled(!model.canConnect)
-                .accessibilityHint("DualSense、中央スティック、PiへのPing応答が必要です")
+                .buttonStyle(.glassProminent).controlSize(.large)
+                .accessibilityHint("接続できない場合は、必要な条件をエラーとして表示します")
         }
         .frame(maxWidth: .infinity, alignment: .leading).padding(18).liquidCard()
     }
@@ -143,5 +143,4 @@ private struct FlowLayout: Layout {
 
 private extension View {
     @ViewBuilder func liquidCard() -> some View { self.background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous)).glassEffect(.regular, in: .rect(cornerRadius: 24)) }
-    @ViewBuilder func liquidGlassCircle() -> some View { self.labelStyle(.iconOnly).frame(width: 42, height: 42).buttonStyle(.glass).glassEffect(.regular, in: .circle) }
 }

@@ -11,6 +11,7 @@ final class ControllerInput: ObservableObject {
     /// Detail sheets leave this false so a controller cannot activate system controls there.
     var acceptsInput = true
     var onChanged: ((ControllerSnapshot) -> Void)?
+    var onConnectionChanged: ((Bool) -> Void)?
 
     private weak var controller: GCController?
     private var observations: [NSObjectProtocol] = []
@@ -21,8 +22,9 @@ final class ControllerInput: ObservableObject {
             NotificationCenter.default.addObserver(forName: .GCControllerDidConnect, object: nil, queue: .main) { [weak self] _ in
                 Task { @MainActor in self?.selectController() }
             },
-            NotificationCenter.default.addObserver(forName: .GCControllerDidDisconnect, object: nil, queue: .main) { [weak self] _ in
-                Task { @MainActor in self?.controllerDisconnected() }
+            NotificationCenter.default.addObserver(forName: .GCControllerDidDisconnect, object: nil, queue: .main) { [weak self] notification in
+                let disconnected = notification.object as? GCController
+                Task { @MainActor in self?.controllerDisconnected(disconnected) }
             }
         ]
         selectController()
@@ -37,6 +39,7 @@ final class ControllerInput: ObservableObject {
         }
         controller = selected
         connected = true
+        onConnectionChanged?(true)
         configure(selected)
     }
 
@@ -99,13 +102,18 @@ final class ControllerInput: ObservableObject {
 
     private func publish() { onChanged?(snapshot) }
 
-    private func controllerDisconnected() {
+    private func controllerDisconnected(_ disconnected: GCController? = nil) {
+        if let disconnected, let controller, disconnected !== controller { return }
         controller = nil
         connected = false
+        onConnectionChanged?(false)
         reset()
     }
 
-    private func dualSensePad(of controller: GCController) -> GCDualSenseGamepad? {
-        controller.extendedGamepad as? GCDualSenseGamepad
+    private func dualSensePad(of controller: GCController) -> GCExtendedGamepad? {
+        // Some iOS versions expose a USB DualSense as the base extended-gamepad
+        // profile rather than GCDualSenseGamepad. The controls used by this app
+        // are all part of GCExtendedGamepad, so accepting that profile is safer.
+        controller.extendedGamepad
     }
 }
