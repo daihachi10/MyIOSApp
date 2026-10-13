@@ -42,7 +42,7 @@ actor RobotTcpSession {
             }
         }
         self.eventHandler = nil
-        throw RobotTcpError.connectionFailed(lastError?.localizedDescription ?? "TCP接続に失敗しました")
+        throw RobotTcpError.connectionFailed(lastError?.localizedDescription ?? String(localized: "TCP接続に失敗しました"))
     }
 
     func update(snapshot: ControllerSnapshot, tuning: ControlTuning) {
@@ -115,9 +115,9 @@ enum RobotTcpError: LocalizedError {
     case timedOut, cancelled, invalidPort, connectionFailed(String)
     var errorDescription: String? {
         switch self {
-        case .timedOut: "TCP接続が3秒以内に完了しませんでした"
-        case .cancelled: "TCP接続が中止されました"
-        case .invalidPort: "TCPポートは1～65535で入力してください"
+        case .timedOut: String(localized: "TCP接続が3秒以内に完了しませんでした")
+        case .cancelled: String(localized: "TCP接続が中止されました")
+        case .invalidPort: String(localized: "TCPポートは1～65535で入力してください")
         case .connectionFailed(let message): message
         }
     }

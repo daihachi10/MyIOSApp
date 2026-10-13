@@ -49,8 +49,8 @@ enum EmergencyStopMode: String, Codable, CaseIterable, Sendable {
 
     var label: String {
         switch self {
-        case .optionsHold: "Optionsを1秒長押し"
-        case .optionsCreate: "Options＋Createを同時押し"
+        case .optionsHold: String(localized: "Optionsを1秒長押し")
+        case .optionsCreate: String(localized: "Options＋Createを同時押し")
         }
     }
 }
@@ -63,9 +63,9 @@ struct ControlProfile: Identifiable, Codable, Equatable, Sendable {
     var tuning: ControlTuning
 
     static let presets: [ControlProfile] = [
-        .init(id: UUID(uuidString: "40C60E3A-68E2-4A44-8B10-000000000001")!, name: "安全確認", speedPercent: 25, emergencyStopMode: .optionsCreate, tuning: .init()),
-        .init(id: UUID(uuidString: "40C60E3A-68E2-4A44-8B10-000000000002")!, name: "通常走行", speedPercent: 100, emergencyStopMode: .optionsCreate, tuning: .init()),
-        .init(id: UUID(uuidString: "40C60E3A-68E2-4A44-8B10-000000000003")!, name: "低速調整", speedPercent: 50, emergencyStopMode: .optionsHold, tuning: .init())
+        .init(id: UUID(uuidString: "40C60E3A-68E2-4A44-8B10-000000000001")!, name: String(localized: "安全確認"), speedPercent: 25, emergencyStopMode: .optionsCreate, tuning: .init()),
+        .init(id: UUID(uuidString: "40C60E3A-68E2-4A44-8B10-000000000002")!, name: String(localized: "通常走行"), speedPercent: 100, emergencyStopMode: .optionsCreate, tuning: .init()),
+        .init(id: UUID(uuidString: "40C60E3A-68E2-4A44-8B10-000000000003")!, name: String(localized: "低速調整"), speedPercent: 50, emergencyStopMode: .optionsHold, tuning: .init())
     ]
 }
 
@@ -74,11 +74,11 @@ enum ConnectionStatus: Equatable, Sendable {
 
     var label: String {
         switch self {
-        case .disconnected: "未接続"
-        case .connecting(let attempt): "接続中（\(attempt)/5）"
-        case .connected: "送信中"
-        case .stopping: "安全停止中"
-        case .error: "接続エラー"
+        case .disconnected: String(localized: "未接続")
+        case .connecting(let attempt): String(localized: "接続中（\(attempt)/5）")
+        case .connected: String(localized: "送信中")
+        case .stopping: String(localized: "安全停止中")
+        case .error: String(localized: "接続エラー")
         }
     }
 

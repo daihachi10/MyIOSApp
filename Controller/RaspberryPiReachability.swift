@@ -22,17 +22,17 @@ struct ICMPReachabilityChecker: ReachabilityChecking {
 private enum ICMPProbe {
     static func measure(host: String) -> PingResult {
         guard !host.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: "接続先が未入力です")
+            return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: String(localized: "接続先が未入力です"))
         }
         var hints = addrinfo(ai_flags: 0, ai_family: AF_INET, ai_socktype: SOCK_DGRAM, ai_protocol: IPPROTO_ICMP, ai_addrlen: 0, ai_canonname: nil, ai_addr: nil, ai_next: nil)
         var resolved: UnsafeMutablePointer<addrinfo>?
         guard getaddrinfo(host, nil, &hints, &resolved) == 0, let addressInfo = resolved else {
-            return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: "名前解決に失敗しました")
+            return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: String(localized: "名前解決に失敗しました"))
         }
         defer { freeaddrinfo(addressInfo) }
         let fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP)
         guard fd >= 0 else {
-            return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: "ICMPソケットを作成できません。ネットワーク権限を確認してください")
+            return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: String(localized: "ICMPソケットを作成できません。ネットワーク権限を確認してください"))
         }
         defer { close(fd) }
         var timeout = timeval(tv_sec: 1, tv_usec: 0)
@@ -45,14 +45,14 @@ private enum ICMPProbe {
             sendto(fd, bytes.baseAddress, bytes.count, 0, addressInfo.pointee.ai_addr, addressInfo.pointee.ai_addrlen)
         }
         guard sent == packet.count else {
-            return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: "ICMP echo requestを送信できませんでした")
+            return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: String(localized: "ICMP echo requestを送信できませんでした"))
         }
         var response = [UInt8](repeating: 0, count: 256)
         let count = response.withUnsafeMutableBytes { bytes in
             recv(fd, bytes.baseAddress, bytes.count, 0)
         }
         guard count > 0 else {
-            return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: "Raspberry Piからping応答がありません")
+            return .init(reachable: false, roundTripMilliseconds: nil, failureDescription: String(localized: "Raspberry Piからping応答がありません"))
         }
         let elapsed = Double(DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
         return .init(reachable: true, roundTripMilliseconds: elapsed, failureDescription: nil)

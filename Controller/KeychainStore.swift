@@ -21,4 +21,4 @@ enum KeychainStore {
     }
 }
 
-enum KeychainError: LocalizedError { case unableToSave(OSStatus); var errorDescription: String? { "SSHパスワードをKeychainへ保存できませんでした" } }
+enum KeychainError: LocalizedError { case unableToSave(OSStatus); var errorDescription: String? { String(localized: "SSHパスワードをKeychainへ保存できませんでした") } }

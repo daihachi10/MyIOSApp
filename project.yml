@@ -17,6 +17,8 @@ targets:
     deploymentTarget: "26.0"
     sources:
       - path: Controller
+    resources:
+      - path: Controller/Resources
     dependencies:
       - package: swift-nio-ssh
         product: NIOSSH

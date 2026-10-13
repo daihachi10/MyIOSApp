@@ -84,7 +84,7 @@ private struct DestinationCard: View {
             Label("接続先", systemImage: "point.3.connected.trianglepath.dotted").font(.headline)
             TextField("Raspberry PiのIPまたはホスト名", text: $model.host).textInputAutocapitalization(.never).autocorrectionDisabled().textContentType(.URL).keyboardType(.URL).textFieldStyle(.roundedBorder).accessibilityLabel("Raspberry Piホスト")
             TextField("ポート", text: $model.port).keyboardType(.numberPad).textFieldStyle(.roundedBorder).accessibilityLabel("TCPポート")
-            Button { Task { await model.begin() } } label: { Label("接続", systemImage: "link").frame(maxWidth: .infinity) }
+            Button { Task { await model.begin() } } label: { Label("接続する", systemImage: "link").frame(maxWidth: .infinity) }
                 .buttonStyle(.glassProminent).controlSize(.large)
                 .accessibilityHint("接続できない場合は、必要な条件をエラーとして表示します")
         }

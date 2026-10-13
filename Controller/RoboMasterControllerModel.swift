@@ -75,8 +75,8 @@ final class RoboMasterControllerModel: ObservableObject {
     }
 
     var raspberryPiLabel: String {
-        guard connectionStatus.isActive, ping.reachable else { return "未接続" }
-        guard let milliseconds = ping.roundTripMilliseconds else { return "Ping — ms" }
+        guard connectionStatus.isActive, ping.reachable else { return String(localized: "未接続") }
+        guard let milliseconds = ping.roundTripMilliseconds else { return String(localized: "Ping — ms") }
         return String(format: "Ping %.1f ms", milliseconds)
     }
 
@@ -86,7 +86,7 @@ final class RoboMasterControllerModel: ObservableObject {
         errorText = nil
         sendErrorCount = 0
         connectionStatus = .connecting(1)
-        appendLog(autoStartReceiver ? "SSHでPi側受信プログラムを起動します" : "Pi側プログラムを起動せずTCP接続します")
+        appendLog(autoStartReceiver ? String(localized: "SSHでPi側受信プログラムを起動します") : String(localized: "Pi側プログラムを起動せずTCP接続します"))
         do {
             if autoStartReceiver {
                 let host = host.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -95,15 +95,15 @@ final class RoboMasterControllerModel: ObservableObject {
                 let password = sshPassword
                 let speed = speedPercent
                 let standardOutput: @Sendable (String) -> Void = { [weak self] line in
-                    Task { @MainActor in self?.appendLog("Pi受信: \(line)") }
+                    Task { @MainActor in self?.appendLog(String(localized: "Pi受信: ") + line) }
                 }
                 let standardError: @Sendable (String) -> Void = { [weak self] line in
-                    Task { @MainActor in self?.appendLog("Pi受信エラー: \(line)") }
+                    Task { @MainActor in self?.appendLog(String(localized: "Pi受信エラー: ") + line) }
                 }
                 try await Task.detached(priority: .userInitiated) { [ssh] in
                     try ssh.startReceiver(host: host, port: sshPort, username: username, password: password, speedPercent: speed, onStandardOutput: standardOutput, onStandardError: standardError)
                 }.value
-                appendLog("Pi側受信プログラムを起動しました")
+                appendLog(String(localized: "Pi側受信プログラムを起動しました"))
             }
             let host = host.trimmingCharacters(in: .whitespacesAndNewlines)
             try await session.start(host: host, port: destinationPort) { [weak self] event in
@@ -114,11 +114,11 @@ final class RoboMasterControllerModel: ObservableObject {
             ssh.close()
             connectionStatus = .error
             errorText = error.localizedDescription
-            appendLog("接続エラー: \(error.localizedDescription)")
+            appendLog(String(localized: "接続エラー: ") + error.localizedDescription)
         }
     }
 
-    func disconnect(reason: String = "切断しました", emergency: Bool = false) async {
+    func disconnect(reason: String = String(localized: "切断しました"), emergency: Bool = false) async {
         guard connectionStatus.isActive else { return }
         connectionStatus = .stopping
         input.reset()
@@ -133,34 +133,34 @@ final class RoboMasterControllerModel: ObservableObject {
     func emergencyStop() async {
         guard connectionStatus.isActive, !emergencyStopped else { return }
         emergencyStopped = true
-        await disconnect(reason: "非常停止: Options停止パケットを送信して切断しました", emergency: true)
+        await disconnect(reason: String(localized: "非常停止: Options停止パケットを送信して切断しました"), emergency: true)
     }
 
     func clearEmergencyStop() {
         guard !connectionStatus.isActive, snapshot.sticksAreCentered(), !snapshot.buttons.contains(.options), !snapshot.buttons.contains(.create) else {
-            errorText = "スティックとOptions／Createを離してから解除してください"; return
+            errorText = String(localized: "スティックとOptions／Createを離してから解除してください"); return
         }
         emergencyStopped = false
         emergencyDetector.reset()
         errorText = nil
-        appendLog("非常停止を解除しました")
+        appendLog(String(localized: "非常停止を解除しました"))
     }
 
     func setSettingsInput(enabled: Bool) { input.acceptsInput = enabled }
 
     func saveSSHPassword() {
-        do { try KeychainStore.savePassword(sshPassword); appendLog("SSHパスワードをKeychainへ保存しました") }
+        do { try KeychainStore.savePassword(sshPassword); appendLog(String(localized: "SSHパスワードをKeychainへ保存しました")) }
         catch { errorText = error.localizedDescription }
     }
 
-    func runManualSSH(_ command: String) { runSSH(label: "手動SSH", command: command) }
-    func killPython() { runSSH(label: "Python停止", command: RaspberryPiCommand.killPython) }
-    func shutdownPi() { runSSH(label: "Raspberry Piシャットダウン", command: RaspberryPiCommand.shutdown, standardInput: sshPassword + "\n") }
+    func runManualSSH(_ command: String) { runSSH(label: String(localized: "手動SSH"), command: command) }
+    func killPython() { runSSH(label: String(localized: "Python停止"), command: RaspberryPiCommand.killPython) }
+    func shutdownPi() { runSSH(label: String(localized: "Raspberry Piシャットダウン"), command: RaspberryPiCommand.shutdown, standardInput: sshPassword + "\n") }
 
     func applyProfile(_ profile: ControlProfile) {
         guard !connectionStatus.isActive else { return }
         speedPercent = profile.speedPercent; emergencyStopMode = profile.emergencyStopMode; tuning = profile.tuning; selectedProfileID = profile.id
-        emergencyDetector.reset(); appendLog("プロファイル適用: \(profile.name)")
+        emergencyDetector.reset(); appendLog(String(localized: "プロファイル適用: ") + profile.name)
     }
 
     func saveProfile(name: String) {
@@ -172,7 +172,7 @@ final class RoboMasterControllerModel: ObservableObject {
         } else if customProfiles.count < 12 {
             let profile = ControlProfile(id: UUID(), name: String(name.prefix(40)), speedPercent: speedPercent, emergencyStopMode: emergencyStopMode, tuning: tuning)
             customProfiles.append(profile); selectedProfileID = profile.id
-        } else { errorText = "保存できるカスタムプロファイルは12件までです" }
+        } else { errorText = String(localized: "保存できるカスタムプロファイルは12件までです") }
     }
 
     func deleteProfile(_ profile: ControlProfile) { customProfiles.removeAll { $0.id == profile.id }; if selectedProfileID == profile.id { selectedProfileID = nil } }
@@ -183,7 +183,7 @@ final class RoboMasterControllerModel: ObservableObject {
         let task = UIApplication.shared.beginBackgroundTask(withName: "RoboMasterSafetyStop") { [weak self] in self?.finishBackgroundTask() }
         backgroundTask = task
         Task { [weak self] in
-            await self?.disconnect(reason: "アプリが前面から離れたため安全停止しました")
+            await self?.disconnect(reason: String(localized: "アプリが前面から離れたため安全停止しました"))
             self?.finishBackgroundTask()
         }
     }
@@ -201,14 +201,14 @@ final class RoboMasterControllerModel: ObservableObject {
         let wasConnected = controllerConnected
         controllerConnected = connected
         if wasConnected, !connected, connectionStatus.isActive {
-            Task { await disconnect(reason: "コントローラーが外れたため安全停止しました") }
+            Task { await disconnect(reason: String(localized: "コントローラーが外れたため安全停止しました")) }
         }
     }
 
     private func handleSessionEvent(_ event: RobotSessionEvent) {
         switch event {
         case .connecting(let attempt, _): connectionStatus = .connecting(attempt)
-        case .connected: connectionStatus = .connected; appendLog("TCP接続済み・50 Hz送信開始")
+        case .connected: connectionStatus = .connected; appendLog(String(localized: "TCP接続済み・50 Hz送信開始"))
         case .packetSent(let packet):
             // Packet visualisation is deliberately throttled to 10 Hz.
             if packetMonitorTask == nil {
@@ -224,7 +224,7 @@ final class RoboMasterControllerModel: ObservableObject {
             connectionStatus = .error
             UIApplication.shared.isIdleTimerDisabled = false
             ssh.close()
-            appendLog("送信エラーにより切断: \(message)")
+            appendLog(String(localized: "送信エラーにより切断: ") + message)
         }
     }
 
@@ -251,13 +251,13 @@ final class RoboMasterControllerModel: ObservableObject {
     private func validateConnectionPrerequisites() -> Bool {
         let message: String?
         switch true {
-        case emergencyStopped: message = "非常停止を解除してから接続してください"
-        case !controllerConnected: message = "DualSenseが検出されていません。USB接続またはiOS設定のBluetooth接続を確認してください"
-        case !snapshot.sticksAreCentered(): message = "左右のスティックを中央に戻してください"
-        case snapshot.buttons.contains(.options) || snapshot.buttons.contains(.create): message = "OptionsとCreateを離してから接続してください"
-        case !hostIsValid: message = "ホスト名またはIPv4アドレスを確認してください"
-        case validPort == nil: message = "ポートは1～65535で入力してください"
-        case autoStartReceiver && (sshUsername.isEmpty || sshPassword.isEmpty || UInt16(sshPort) == nil): message = "SSH設定とKeychainのパスワードを確認してください"
+        case emergencyStopped: message = String(localized: "非常停止を解除してから接続してください")
+        case !controllerConnected: message = String(localized: "DualSenseが検出されていません。USB接続またはiOS設定のBluetooth接続を確認してください")
+        case !snapshot.sticksAreCentered(): message = String(localized: "左右のスティックを中央に戻してください")
+        case snapshot.buttons.contains(.options) || snapshot.buttons.contains(.create): message = String(localized: "OptionsとCreateを離してから接続してください")
+        case !hostIsValid: message = String(localized: "ホスト名またはIPv4アドレスを確認してください")
+        case validPort == nil: message = String(localized: "ポートは1～65535で入力してください")
+        case autoStartReceiver && (sshUsername.isEmpty || sshPassword.isEmpty || UInt16(sshPort) == nil): message = String(localized: "SSH設定とKeychainのパスワードを確認してください")
         default: message = nil
         }
         if let message { errorText = message; appendLog("エラー: \(message)"); return false }
@@ -265,14 +265,14 @@ final class RoboMasterControllerModel: ObservableObject {
     }
 
     private func runSSH(label: String, command: String, standardInput: String? = nil) {
-        guard !sshCommandRunning, hostIsValid, !sshUsername.isEmpty, !sshPassword.isEmpty, let port = Int(sshPort) else { errorText = "SSH設定を確認してください"; return }
-        sshCommandRunning = true; errorText = nil; appendLog("\(label) 実行: \(command)")
+        guard !sshCommandRunning, hostIsValid, !sshUsername.isEmpty, !sshPassword.isEmpty, let port = Int(sshPort) else { errorText = String(localized: "SSH設定を確認してください"); return }
+        sshCommandRunning = true; errorText = nil; appendLog(label + String(localized: " 実行: ") + command)
         let host = host.trimmingCharacters(in: .whitespacesAndNewlines); let username = sshUsername; let password = sshPassword
         Task { [weak self, ssh] in
             do {
                 let result = try await Task.detached(priority: .userInitiated) { try ssh.execute(host: host, port: port, username: username, password: password, command: command, standardInput: standardInput) }.value
-                self?.lastSSHResult = result; self?.appendLog("\(label) 終了コード=\(result.exitStatus)\n\(result.output)")
-            } catch { self?.errorText = error.localizedDescription; self?.appendLog("\(label) エラー: \(error.localizedDescription)") }
+                self?.lastSSHResult = result; self?.appendLog(label + String(localized: " 終了コード=") + String(result.exitStatus) + "\n" + result.output)
+            } catch { self?.errorText = error.localizedDescription; self?.appendLog(label + String(localized: " エラー: ") + error.localizedDescription) }
             self?.sshCommandRunning = false
         }
     }

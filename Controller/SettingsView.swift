@@ -34,7 +34,7 @@ struct SettingsView: View {
     }
 
     private var connectionSection: some View {
-        Section("接続") {
+        Section("接続設定") {
             Toggle("Pi側プログラムをSSHで起動", isOn: $model.autoStartReceiver)
             Text("オフの場合はPi側の受信プログラムを起動せず、TCPだけを接続します。")
                 .font(.footnote).foregroundStyle(.secondary)

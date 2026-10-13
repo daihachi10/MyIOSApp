@@ -9,7 +9,7 @@ struct SSHCommandResult: Equatable, Sendable {
     var standardOutput: String
     var standardError: String
     var succeeded: Bool { exitStatus == 0 }
-    var output: String { [standardOutput, standardError].filter { !$0.isEmpty }.joined(separator: "\n").isEmpty ? "（出力なし）" : [standardOutput, standardError].filter { !$0.isEmpty }.joined(separator: "\n") }
+    var output: String { [standardOutput, standardError].filter { !$0.isEmpty }.joined(separator: "\n").isEmpty ? String(localized: "（出力なし）") : [standardOutput, standardError].filter { !$0.isEmpty }.joined(separator: "\n") }
 }
 
 enum RaspberryPiCommand {
@@ -176,9 +176,9 @@ private enum SSHError: LocalizedError {
     case missingCredentials, passwordAuthenticationUnsupported, invalidChannel
     var errorDescription: String? {
         switch self {
-        case .missingCredentials: "SSHのユーザー名またはパスワードが未設定です"
-        case .passwordAuthenticationUnsupported: "SSHサーバーがパスワード認証を受け付けません"
-        case .invalidChannel: "SSHセッションを作成できませんでした"
+        case .missingCredentials: String(localized: "SSHのユーザー名またはパスワードが未設定です")
+        case .passwordAuthenticationUnsupported: String(localized: "SSHサーバーがパスワード認証を受け付けません")
+        case .invalidChannel: String(localized: "SSHセッションを作成できませんでした")
         }
     }
 }
