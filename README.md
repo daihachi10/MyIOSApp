@@ -1,5 +1,7 @@
 # RoboMaster Controller for iPhone
 
+アプリアイコンには、Google Material Symbolsの`stadia_controller`（Outlined）を使用しています。
+
 Raspberry Pi上の既存 `controller_motor_receiver.py` に、USBまたはBluetooth接続したDualSenseの入力をTCPで送るSwiftUIアプリです。Pi側・STM32側のソフトウェアと8バイト通信仕様は変更しません。
 
 > **安全上の注意**: 初回確認は必ず車輪を浮かせ、非常停止できる状態で行ってください。通信断・コントローラー切断・画面ロック・アプリのバックグラウンド移行時には、アプリが中立フレームを3回送信して切断します。バックグラウンドでの連続操作はできません。
